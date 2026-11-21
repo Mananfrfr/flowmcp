@@ -44,6 +44,25 @@ answer = pipeline.ask("What is our refund policy?")
 print(answer)
 ```
 
+### Reusable prompt templates
+
+```python
+pipeline.set_template(
+    "Answer using this evidence: {context}\n\nQuestion: {query}"
+)
+answer = pipeline.ask("What is the refund policy?")
+# The same template also applies to await pipeline.aask(...).
+```
+
+`{query}` contains the current question and `{context}` contains retrieved chunks
+joined by blank lines (or an empty string when no documents are available).
+Templates may use either placeholder; a query-only template is supported.
+Use `{{` and `}}` for literal braces, such as JSON examples. Unknown fields,
+attribute/index lookups, format specifications, and conversions are rejected
+when setting the template. An invalid replacement leaves the previous template
+intact. If MCP tools return results, these are appended after the rendered
+prompt. Without a template, existing prompt construction is unchanged.
+
 ### Java
 
 ```xml
