@@ -27,6 +27,8 @@ jobs:
           VERSION=$(curl -s -H "Authorization: token ${GITHUB_AUTH_TOKEN}" https://api.github.com/repos/ossf/scorecard/releases/latest | python3 -c "import sys,json; print(json.load(sys.stdin)['tag_name'])")
           VER_NUM="${VERSION#v}"
           curl -sSLO "https://github.com/ossf/scorecard/releases/download/${VERSION}/scorecard_${VER_NUM}_linux_amd64.tar.gz"
+          curl -sSLO "https://github.com/ossf/scorecard/releases/download/${VERSION}/scorecard_${VER_NUM}_checksums.txt"
+          sha256sum --check --ignore-missing "scorecard_${VER_NUM}_checksums.txt"
           tar -xzf "scorecard_${VER_NUM}_linux_amd64.tar.gz"
           BINARY=$(tar -tzf "scorecard_${VER_NUM}_linux_amd64.tar.gz" | grep -v '/$' | grep scorecard | head -1)
           chmod +x "${BINARY}"
