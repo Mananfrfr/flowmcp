@@ -12,8 +12,8 @@
 
 Building an AI feature that uses your own data and tools requires wiring three things together:
 1. An LLM (OpenAI, Claude, Gemini, Ollama)
-2. Your documents (RAG â€” so the AI knows YOUR data)
-3. External tools (via MCP â€” so the AI can take actions)
+2. Your documents (RAG — so the AI knows YOUR data)
+3. External tools (via MCP — so the AI can take actions)
 
 LangChain does this but needs hundreds of lines of setup. **flowmcp does it in 5 lines.**
 
@@ -104,12 +104,12 @@ String answer = pipeline.ask("What is our refund policy?");
 
 | Provider | Python | Java |
 |---|---|---|
-| OpenAI | âœ… | âœ… |
-| Anthropic | âœ… | ðŸš§ |
-| Ollama (local) | âœ… | âœ… |
-| Gemini | âœ… | ðŸš§ |
+| OpenAI | ✅ | ✅ |
+| Anthropic | ✅ | 🚧 |
+| Ollama (local) | ✅ | ✅ |
+| Gemini | ✅ | 🚧 |
 
-âœ… = done Â· ðŸš§ = contributions welcome
+✅ = done · 🚧 = contributions welcome
 
 ---
 
@@ -117,13 +117,13 @@ String answer = pipeline.ask("What is our refund policy?");
 
 ```
 Your Data (docs, files, text)
-         â†“
-      RAG Pipeline  â†’ finds relevant chunks for your query
-         â†“
-      MCP Tools     â†’ runs external tools (filesystem, github, etc.)
-         â†“
-      LLM           â†’ generates a response with full context
-         â†“
+         ↓
+      RAG Pipeline  → finds relevant chunks for your query
+         ↓
+      MCP Tools     → runs external tools (filesystem, github, etc.)
+         ↓
+      LLM           → generates a response with full context
+         ↓
       Answer
 ```
 
@@ -139,4 +139,4 @@ Good first issues are labeled [`good first issue`](https://github.com/SreejaPasu
 
 ## License
 
-MIT â€” see [LICENSE](LICENSE)
+MIT — see [LICENSE](LICENSE)
