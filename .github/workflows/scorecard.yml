@@ -28,13 +28,15 @@ jobs:
           VER_NUM="${VERSION#v}"
           curl -sSLO "https://github.com/ossf/scorecard/releases/download/${VERSION}/scorecard_${VER_NUM}_linux_amd64.tar.gz"
           tar -xzf "scorecard_${VER_NUM}_linux_amd64.tar.gz"
-          chmod +x scorecard_linux_amd64
+          BINARY=$(tar -tzf "scorecard_${VER_NUM}_linux_amd64.tar.gz" | grep -v '/$' | grep scorecard | head -1)
+          chmod +x "${BINARY}"
+          mv "${BINARY}" scorecard_bin
 
       - name: Run Scorecard
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./scorecard_linux_amd64 \
+          ./scorecard_bin \
             --repo=github.com/SreejaPasula/flowmcp \
             --format=json \
             --show-details \
