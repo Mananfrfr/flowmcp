@@ -1,3 +1,4 @@
+from string import Formatter
 from typing import List, Optional, Union
 
 from .llm.base import LLM
@@ -30,6 +31,31 @@ class Pipeline:
         self.llm = LLM.from_string(llm) if isinstance(llm, str) else llm
         self.rag = RAG(docs, embedding_model=embedding_model) if docs else None
         self.mcp = MCP(tools) if tools else None
+        self._template: Optional[str] = None
+
+    def set_template(self, template: str) -> None:
+        """Set a prompt with {query} and/or {context} placeholders.
+
+        Use doubled braces for literal braces, for example {{"answer": "..."}}.
+        Unknown fields, format specifications, and conversions are rejected
+        before any retrieval, tool, or LLM calls. Tool results, when present,
+        are appended after the rendered template.
+
+        Example:
+            pipeline.set_template("Context: {context}\nQuestion: {query}")
+        """
+        if not isinstance(template, str):
+            raise TypeError("template must be a string")
+        for _, field, format_spec, conversion in Formatter().parse(template):
+            if field is None:
+                continue
+            if field not in {"query", "context"}:
+                raise ValueError("Template fields must be {query} or {context}")
+            if format_spec or conversion:
+                raise ValueError(
+                    "Template fields do not support formats or conversions"
+                )
+        self._template = template
 
     def ask(self, question: str, top_k: int = 3) -> str:
         context = ""
@@ -75,6 +101,11 @@ class Pipeline:
         return await self.llm.acomplete(prompt)
 
     def _build_prompt(self, question: str, context: str, tool_results: str) -> str:
+        if self._template is not None:
+            prompt = self._template.format(query=question, context=context)
+            if tool_results:
+                prompt += f"\n\nTool results:\n{tool_results}"
+            return prompt
         parts = []
         if context:
             parts.append(f"Context from documents:\n{context}")

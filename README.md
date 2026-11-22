@@ -61,6 +61,25 @@ are not processed. This convenience method does not use a provider-side batch
 API or offer batch pricing. Existing `ask(question)` calls remain supported;
 `ask(question, top_k=5)` can also customize retrieval for one question.
 
+### Reusable prompt templates
+
+```python
+pipeline.set_template(
+    "Answer using this evidence: {context}\n\nQuestion: {query}"
+)
+answer = pipeline.ask("What is the refund policy?")
+# The same template also applies to await pipeline.aask(...).
+```
+
+`{query}` contains the current question and `{context}` contains retrieved chunks
+joined by blank lines (or an empty string when no documents are available).
+Templates may use either placeholder; a query-only template is supported.
+Use `{{` and `}}` for literal braces, such as JSON examples. Unknown fields,
+attribute/index lookups, format specifications, and conversions are rejected
+when setting the template. An invalid replacement leaves the previous template
+intact. If MCP tools return results, these are appended after the rendered
+prompt. Without a template, existing prompt construction is unchanged.
+
 ### Configure document chunks
 
 ```python

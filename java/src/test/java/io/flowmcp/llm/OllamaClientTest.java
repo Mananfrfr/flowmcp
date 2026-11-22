@@ -1,6 +1,6 @@
 package io.flowmcp.llm;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -34,7 +34,7 @@ public class OllamaClientTest {
         when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
             .thenReturn(mockResponse);
 
-        OllamaClient client = new OllamaClient("llama3", "http://localhost:11434", mockHttpClient, new ObjectMapper());
+        OllamaClient client = new OllamaClient("llama3", "http://localhost:11434", mockHttpClient, new Gson());
         String result = client.complete("Generate json example");
 
         String expected = "Here is the code:\n```json\n{\"key\": \"value\"}\n```\nHe said: \"Done!\"";
@@ -53,7 +53,7 @@ public class OllamaClientTest {
         when(mockHttpClient.send(requestCaptor.capture(), any(HttpResponse.BodyHandler.class)))
             .thenReturn(mockResponse);
 
-        OllamaClient client = new OllamaClient("llama3", "http://localhost:11434", mockHttpClient, new ObjectMapper());
+        OllamaClient client = new OllamaClient("llama3", "http://localhost:11434", mockHttpClient, new Gson());
         String result = client.complete("Quotes: \"hello\" and newlines:\nworld");
 
         assertEquals("ok", result);
@@ -73,7 +73,7 @@ public class OllamaClientTest {
         when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
             .thenReturn(mockResponse);
 
-        OllamaClient client = new OllamaClient("llama3", "http://localhost:11434", mockHttpClient, new ObjectMapper());
+        OllamaClient client = new OllamaClient("llama3", "http://localhost:11434", mockHttpClient, new Gson());
         assertThrows(RuntimeException.class, () -> client.complete("test"));
     }
 }

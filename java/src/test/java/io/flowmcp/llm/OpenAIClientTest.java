@@ -1,6 +1,6 @@
 package io.flowmcp.llm;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -35,7 +35,7 @@ public class OpenAIClientTest {
         when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
             .thenReturn(mockResponse);
 
-        OpenAIClient client = new OpenAIClient("gpt-4", "test-key-123", "https://api.openai.com/v1", mockHttpClient, new ObjectMapper());
+        OpenAIClient client = new OpenAIClient("gpt-4", "test-key-123", "https://api.openai.com/v1", mockHttpClient, new Gson());
         String result = client.complete("Hello");
 
         assertEquals("OpenAI response answer", result);
@@ -53,7 +53,7 @@ public class OpenAIClientTest {
         when(mockHttpClient.send(captor.capture(), any(HttpResponse.BodyHandler.class)))
             .thenReturn(mockResponse);
 
-        OpenAIClient client = new OpenAIClient("gpt-4o", "sk-secret123", "https://api.openai.com/v1", mockHttpClient, new ObjectMapper());
+        OpenAIClient client = new OpenAIClient("gpt-4o", "sk-secret123", "https://api.openai.com/v1", mockHttpClient, new Gson());
         client.complete("Test prompt");
 
         HttpRequest req = captor.getValue();
@@ -65,7 +65,7 @@ public class OpenAIClientTest {
 
     @Test
     public void testMissingApiKeyThrowsIllegalStateException() {
-        OpenAIClient client = new OpenAIClient("gpt-4", null, "https://api.openai.com/v1", mock(HttpClient.class), new ObjectMapper());
+        OpenAIClient client = new OpenAIClient("gpt-4", null, "https://api.openai.com/v1", mock(HttpClient.class), new Gson());
         Exception exception = assertThrows(IllegalStateException.class, () -> client.complete("Hello"));
         assertTrue(exception.getMessage().contains("OPENAI_API_KEY"));
     }
@@ -81,7 +81,7 @@ public class OpenAIClientTest {
         when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
             .thenReturn(mockResponse);
 
-        OpenAIClient client = new OpenAIClient("gpt-4", "bad-key", "https://api.openai.com/v1", mockHttpClient, new ObjectMapper());
+        OpenAIClient client = new OpenAIClient("gpt-4", "bad-key", "https://api.openai.com/v1", mockHttpClient, new Gson());
         assertThrows(RuntimeException.class, () -> client.complete("Hello"));
     }
 
@@ -93,7 +93,7 @@ public class OpenAIClientTest {
 
     @Test
     public void testNullModelThrowsIllegalArgumentException() {
-        OpenAIClient client = new OpenAIClient(null, "key", "https://api.openai.com/v1", mock(HttpClient.class), new ObjectMapper());
+        OpenAIClient client = new OpenAIClient(null, "key", "https://api.openai.com/v1", mock(HttpClient.class), new Gson());
         assertThrows(IllegalArgumentException.class, () -> client.complete("test"));
     }
 
@@ -108,7 +108,7 @@ public class OpenAIClientTest {
         when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
             .thenReturn(mockResponse);
 
-        OpenAIClient client = new OpenAIClient("gpt-4", "test-key", "https://api.openai.com/v1", mockHttpClient, new ObjectMapper());
+        OpenAIClient client = new OpenAIClient("gpt-4", "test-key", "https://api.openai.com/v1", mockHttpClient, new Gson());
         assertDoesNotThrow(() -> client.complete(null));
     }
 }

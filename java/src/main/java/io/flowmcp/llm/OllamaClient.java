@@ -1,7 +1,8 @@
 package io.flowmcp.llm;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -17,7 +18,7 @@ public class OllamaClient implements LLMClient {
     private final String model;
     private final String baseUrl;
     private final HttpClient httpClient;
-    private final ObjectMapper objectMapper;
+    private final Gson gson;
 
     public OllamaClient(String model) {
         this(model, "http://localhost:11434");
@@ -27,21 +28,20 @@ public class OllamaClient implements LLMClient {
         this.model = model;
         this.baseUrl = baseUrl;
         this.httpClient = HttpClient.newHttpClient();
-        this.objectMapper = new ObjectMapper();
+        this.gson = new Gson();
     }
 
-    // Constructor for testing with custom/mock HttpClient and ObjectMapper
-    public OllamaClient(String model, String baseUrl, HttpClient httpClient, ObjectMapper objectMapper) {
+    public OllamaClient(String model, String baseUrl, HttpClient httpClient, Gson gson) {
         this.model = model;
         this.baseUrl = baseUrl;
         this.httpClient = httpClient;
-        this.objectMapper = objectMapper;
+        this.gson = gson != null ? gson : new Gson();
     }
 
     @Override
     public String complete(String prompt) {
         try {
-            String body = objectMapper.writeValueAsString(Map.of(
+            String body = gson.toJson(Map.of(
                 "model", model,
                 "prompt", prompt != null ? prompt : "",
                 "stream", false
@@ -58,12 +58,11 @@ public class OllamaClient implements LLMClient {
                 throw new RuntimeException("Ollama API returned HTTP status " + response.statusCode() + ": " + response.body());
             }
 
-            JsonNode root = objectMapper.readTree(response.body());
-            JsonNode responseNode = root.get("response");
-            if (responseNode == null || responseNode.isNull()) {
+            JsonObject root = JsonParser.parseString(response.body()).getAsJsonObject();
+            if (!root.has("response") || root.get("response").isJsonNull()) {
                 throw new RuntimeException("Missing 'response' field in Ollama response: " + response.body());
             }
-            return responseNode.asText();
+            return root.get("response").getAsString();
         } catch (Exception e) {
             throw new RuntimeException("Ollama request failed: " + e.getMessage(), e);
         }

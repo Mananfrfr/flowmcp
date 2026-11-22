@@ -99,3 +99,10 @@ def test_invalid_strategy_rejected_for_empty_sources():
 def test_empty_text_and_smallest_valid_window():
     assert chunk_text("", chunk_size=1, overlap=0) == []
     assert chunk_text("one two", chunk_size=1, overlap=0) == ["one", "two"]
+
+
+def test_missing_document_path_raises_before_embedding():
+    embedder = Mock()
+    with pytest.raises(FileNotFoundError, match="does not exist"):
+        RAG("missing document.txt", embedder=embedder, chunk_size=3, chunk_overlap=1)
+    embedder.assert_not_called()
