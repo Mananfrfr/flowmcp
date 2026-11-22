@@ -16,4 +16,23 @@ class AnthropicClient(LLMBase):
             max_tokens=1024,
             messages=[{"role": "user", "content": prompt}]
         )
+        if message.usage:
+            self.last_usage = {
+                "prompt_tokens": message.usage.input_tokens,
+                "completion_tokens": message.usage.output_tokens,
+                "total_tokens": message.usage.input_tokens + message.usage.output_tokens,
+            }
+        return message.content[0].text
+
+    async def acomplete(self, prompt: str) -> str:
+        try:
+            import anthropic
+        except ImportError:
+            raise ImportError("Install anthropic: pip install anthropic")
+        client = anthropic.AsyncAnthropic()
+        message = await client.messages.create(
+            model=self.model,
+            max_tokens=1024,
+            messages=[{"role": "user", "content": prompt}]
+        )
         return message.content[0].text

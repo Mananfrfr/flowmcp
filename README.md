@@ -44,6 +44,22 @@ answer = pipeline.ask("What is our refund policy?")
 print(answer)
 ```
 
+### Multiple questions
+
+```python
+answers = pipeline.batch(
+    ["What is the refund policy?", "How do I cancel?"], top_k=3
+)
+```
+
+`batch()` processes queries sequentially and returns answers in the same order.
+Each query performs its own document retrieval, tool calls, and LLM request.
+`top_k` controls the number of retrieved chunks per query. An empty list returns
+`[]` without making calls. The first error is raised immediately; later queries
+are not processed. This convenience method does not use a provider-side batch
+API or offer batch pricing. Existing `ask(question)` calls remain supported;
+`ask(question, top_k=5)` can also customize retrieval for one question.
+
 ### Java
 
 ```xml

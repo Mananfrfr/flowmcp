@@ -22,4 +22,12 @@ class OllamaClient(LLMBase):
             headers={"Content-Type": "application/json"}
         )
         with urllib.request.urlopen(req) as response:
-            return json.loads(response.read())["response"]
+            data = json.loads(response.read())
+            prompt_tokens = data.get("prompt_eval_count", 0)
+            completion_tokens = data.get("eval_count", 0)
+            self.last_usage = {
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens,
+                "total_tokens": prompt_tokens + completion_tokens,
+            }
+            return data["response"]

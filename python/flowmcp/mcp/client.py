@@ -34,8 +34,35 @@ class MCP:
                 results.append(f"[{name}]: Error — {e}")
         return "\n".join(results)
 
+    async def arun(self, query: str) -> str:
+        import asyncio
+        results = []
+        for name, server in self._servers.items():
+            try:
+                result = await asyncio.to_thread(server.execute, query)
+                if result:
+                    results.append(f"[{name}]: {result}")
+            except Exception as e:
+                results.append(f"[{name}]: Error — {e}")
+        return "\n".join(results)
+
     def list_tools(self) -> List[str]:
         return list(self._servers.keys())
+
+
+class MCPServer:
+    """
+    Represents a connection to a single MCP server.
+    Contributors: implement specific MCP server integrations here.
+    """
+
+    def __init__(self, name: str):
+        self.name = name
+
+    def execute(self, query: str) -> Optional[str]:
+        # Contributors: add real MCP server communication here
+        # See: https://modelcontextprotocol.io/docs
+        return None
 
 
 class MCPServer:

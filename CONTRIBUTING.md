@@ -30,7 +30,7 @@ By participating, you agree to uphold it. Report unacceptable behaviour to sreej
 ---
 
 ## Getting Started
-
+Run `mvn -version` to check which Java version Maven is using.
 ### Python
 
 ```bash

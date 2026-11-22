@@ -21,6 +21,13 @@ class GeminiClient(LLMBase):
                 kwargs["api_key"] = self.api_key
             client = genai.Client(**kwargs)
             response = client.models.generate_content(model=self.model, contents=prompt)
+            if hasattr(response, "usage_metadata") and response.usage_metadata:
+                meta = response.usage_metadata
+                self.last_usage = {
+                    "prompt_tokens": getattr(meta, "prompt_token_count", 0),
+                    "completion_tokens": getattr(meta, "candidates_token_count", 0),
+                    "total_tokens": getattr(meta, "total_token_count", 0),
+                }
             return response.text
         except ImportError:
             pass
@@ -31,6 +38,28 @@ class GeminiClient(LLMBase):
                 genai_legacy.configure(api_key=self.api_key)
             model = genai_legacy.GenerativeModel(self.model)
             response = model.generate_content(prompt)
+            if hasattr(response, "usage_metadata") and response.usage_metadata:
+                meta = response.usage_metadata
+                self.last_usage = {
+                    "prompt_tokens": getattr(meta, "prompt_token_count", 0),
+                    "completion_tokens": getattr(meta, "candidates_token_count", 0),
+                    "total_tokens": getattr(meta, "total_token_count", 0),
+                }
             return response.text
         except ImportError:
             raise ImportError("Install google-genai: pip install google-genai")
+
+    async def acomplete(self, prompt: str) -> str:
+        try:
+            import google.genai as genai
+            kwargs = {}
+            if self.api_key:
+                kwargs["api_key"] = self.api_key
+            client = genai.Client(**kwargs)
+            response = await client.aio.models.generate_content(model=self.model, contents=prompt)
+            return response.text
+        except (ImportError, AttributeError):
+            pass
+
+        import asyncio
+        return await asyncio.to_thread(self.complete, prompt)

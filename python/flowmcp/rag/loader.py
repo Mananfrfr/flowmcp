@@ -1,7 +1,7 @@
 
-
 import os
 from typing import List, Optional, Union
+
 from .chunker import chunk_text
 from .retriever import DEFAULT_EMBEDDING_MODEL, EmbeddingFunction, Retriever
 
@@ -24,7 +24,10 @@ class RAG:
         source: Union[str, List[str]],
         embedding_model: str = DEFAULT_EMBEDDING_MODEL,
         embedder: Optional[EmbeddingFunction] = None,
+        chunk_strategy: str = "fixed",
     ):
+        self.chunk_strategy = chunk_strategy
+
         sources = [source] if isinstance(source, (str, bytes, os.PathLike)) else source
         self.retriever = Retriever(model_name=embedding_model, embedder=embedder)
 
@@ -71,9 +74,9 @@ class RAG:
         """
         Extracts plain text from digital PDF files using pypdf.
         Handles edge cases:
-- Password-protected/encrypted PDFs (raises clear ValueError)
-- Whitespace/blank pages (filtered out)
-- Scanned/image-only PDFs with no text layer (returns empty string)
+        - Password-protected/encrypted PDFs (raises clear ValueError)
+        - Whitespace/blank pages (filtered out)
+        - Scanned/image-only PDFs with no text layer (returns empty string)
         """
         try:
             from pypdf import PdfReader
@@ -98,6 +101,7 @@ class RAG:
             import httpx
         except ImportError:
             raise ImportError("Install httpx to load documents from a URL: pip install httpx")
+
         try:
             from bs4 import BeautifulSoup
         except ImportError:
@@ -116,7 +120,7 @@ class RAG:
 
     def _load_url(self, url: str):
         text = self._fetch_url_text(url)
-        chunks = chunk_text(text)
+        chunks = chunk_text(text, strategy=self.chunk_strategy)
         self.retriever.add(chunks)
 
     def _load_file(self, path: str):
@@ -125,15 +129,13 @@ class RAG:
         else:
             with open(path, "r", encoding="utf-8", errors="ignore") as f:
                 text = f.read()
-        chunks = chunk_text(text)
+
+        chunks = chunk_text(text, strategy=self.chunk_strategy)
         self.retriever.add(chunks)
 
     def _load_text(self, text: str):
-        chunks = chunk_text(text)
+        chunks = chunk_text(text, strategy=self.chunk_strategy)
         self.retriever.add(chunks)
 
     def retrieve(self, query: str, top_k: int = 3) -> List[str]:
         return self.retriever.search(query, top_k)
-
-
-
