@@ -22,8 +22,9 @@ jobs:
 
       - name: Install Scorecard
         run: |
-          curl -sSL https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64.tar.gz \
-            | tar -xz scorecard_linux_amd64
+          VERSION=$(curl -s https://api.github.com/repos/ossf/scorecard/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+          curl -sSLO "https://github.com/ossf/scorecard/releases/download/${VERSION}/scorecard_linux_amd64.tar.gz"
+          tar -xzf scorecard_linux_amd64.tar.gz
           chmod +x scorecard_linux_amd64
 
       - name: Run Scorecard
