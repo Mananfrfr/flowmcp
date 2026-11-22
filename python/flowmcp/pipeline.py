@@ -57,11 +57,11 @@ class Pipeline:
                 )
         self._template = template
 
-    def ask(self, question: str) -> str:
+    def ask(self, question: str, top_k: int = 3) -> str:
         context = ""
 
         if self.rag:
-            chunks = self.rag.retrieve(question)
+            chunks = self.rag.retrieve(question, top_k=top_k)
             context = "\n\n".join(chunks)
 
         tool_results = ""
@@ -70,6 +70,20 @@ class Pipeline:
 
         prompt = self._build_prompt(question, context, tool_results)
         return self.llm.complete(prompt)
+
+    def batch(self, queries: List[str], top_k: int = 3) -> List[str]:
+        """Answer queries sequentially, returning answers in input order.
+
+        Each query runs its own retrieval, tools, and LLM call through ask().
+        An empty list makes no calls. Errors propagate immediately, so later
+        queries are not processed. This is not a provider-side batch API.
+
+        Example:
+            answers = pipeline.batch(
+                ["What is the refund policy?", "How do I cancel?"], top_k=5
+            )
+        """
+        return [self.ask(query, top_k=top_k) for query in queries]
 
     async def aask(self, question: str) -> str:
         import asyncio

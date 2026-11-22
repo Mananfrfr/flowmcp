@@ -1,0 +1,44 @@
+name: OpenSSF Scorecard
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"  # every Monday 6am
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Install Scorecard
+        run: |
+          VERSION=$(curl -s https://api.github.com/repos/ossf/scorecard/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+          curl -sSLO "https://github.com/ossf/scorecard/releases/download/${VERSION}/scorecard_linux_amd64.tar.gz"
+          tar -xzf scorecard_linux_amd64.tar.gz
+          chmod +x scorecard_linux_amd64
+
+      - name: Run Scorecard
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ./scorecard_linux_amd64 \
+            --repo=github.com/SreejaPasula/flowmcp \
+            --format=json \
+            --show-details \
+            2>&1 | tee scorecard-results.json
+
+      - name: Upload results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: scorecard-results
+          path: scorecard-results.json

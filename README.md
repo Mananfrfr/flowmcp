@@ -12,8 +12,8 @@
 
 Building an AI feature that uses your own data and tools requires wiring three things together:
 1. An LLM (OpenAI, Claude, Gemini, Ollama)
-2. Your documents (RAG — so the AI knows YOUR data)
-3. External tools (via MCP — so the AI can take actions)
+2. Your documents (RAG â€” so the AI knows YOUR data)
+3. External tools (via MCP â€” so the AI can take actions)
 
 LangChain does this but needs hundreds of lines of setup. **flowmcp does it in 5 lines.**
 
@@ -43,6 +43,22 @@ pipeline = Pipeline(
 answer = pipeline.ask("What is our refund policy?")
 print(answer)
 ```
+
+### Multiple questions
+
+```python
+answers = pipeline.batch(
+    ["What is the refund policy?", "How do I cancel?"], top_k=3
+)
+```
+
+`batch()` processes queries sequentially and returns answers in the same order.
+Each query performs its own document retrieval, tool calls, and LLM request.
+`top_k` controls the number of retrieved chunks per query. An empty list returns
+`[]` without making calls. The first error is raised immediately; later queries
+are not processed. This convenience method does not use a provider-side batch
+API or offer batch pricing. Existing `ask(question)` calls remain supported;
+`ask(question, top_k=5)` can also customize retrieval for one question.
 
 ### Reusable prompt templates
 
@@ -88,12 +104,12 @@ String answer = pipeline.ask("What is our refund policy?");
 
 | Provider | Python | Java |
 |---|---|---|
-| OpenAI | ✅ | ✅ |
-| Anthropic | ✅ | 🚧 |
-| Ollama (local) | ✅ | ✅ |
-| Gemini | ✅ | 🚧 |
+| OpenAI | âœ… | âœ… |
+| Anthropic | âœ… | ðŸš§ |
+| Ollama (local) | âœ… | âœ… |
+| Gemini | âœ… | ðŸš§ |
 
-✅ = done · 🚧 = contributions welcome
+âœ… = done Â· ðŸš§ = contributions welcome
 
 ---
 
@@ -101,13 +117,13 @@ String answer = pipeline.ask("What is our refund policy?");
 
 ```
 Your Data (docs, files, text)
-         ↓
-      RAG Pipeline  → finds relevant chunks for your query
-         ↓
-      MCP Tools     → runs external tools (filesystem, github, etc.)
-         ↓
-      LLM           → generates a response with full context
-         ↓
+         â†“
+      RAG Pipeline  â†’ finds relevant chunks for your query
+         â†“
+      MCP Tools     â†’ runs external tools (filesystem, github, etc.)
+         â†“
+      LLM           â†’ generates a response with full context
+         â†“
       Answer
 ```
 
@@ -123,4 +139,4 @@ Good first issues are labeled [`good first issue`](https://github.com/SreejaPasu
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+MIT â€” see [LICENSE](LICENSE)

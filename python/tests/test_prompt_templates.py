@@ -29,7 +29,7 @@ def test_template_uses_retrieved_context_and_query():
     pipeline.rag.retrieve.return_value = ["first", "second"]
     pipeline.set_template("Evidence: {context}\nQuestion: {query}")
     assert pipeline.ask("Why?") == "Evidence: first\n\nsecond\nQuestion: Why?"
-    pipeline.rag.retrieve.assert_called_once_with("Why?")
+    pipeline.rag.retrieve.assert_called_once_with("Why?", top_k=3)
 
 
 def test_query_only_template():
@@ -109,3 +109,17 @@ async def test_async_template_uses_context_and_tools():
     pipeline.rag.retrieve.assert_called_once_with("Why?")
     pipeline.mcp.arun.assert_awaited_once_with("Why?")
     pipeline.llm.acomplete.assert_awaited_once()
+
+
+def test_batch_reuses_template_for_each_query():
+    pipeline = make_pipeline()
+    pipeline.rag = Mock()
+    pipeline.rag.retrieve.side_effect = [["first"], ["second"]]
+    pipeline.set_template("{context}: {query}")
+    assert pipeline.batch(["One?", "Two?"], top_k=5) == ["first: One?", "second: Two?"]
+    from unittest.mock import call
+
+    assert pipeline.rag.retrieve.call_args_list == [
+        call("One?", top_k=5),
+        call("Two?", top_k=5),
+    ]
